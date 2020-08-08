@@ -1,6 +1,7 @@
 FROM alpine
 
-ENV CONFIG=https://raw.githubusercontent.com/PrivacyIO/ktconfig/master/config.json
+# ENV CONFIG=https://raw.githubusercontent.com/PrivacyIO/ktconfig/master/config.json
+ENV CONFIG="./config.json"
 
 RUN apk update && apk --no-cache add ca-certificates unzip && \
     wget -c https://github.com/v2fly/v2ray-core/releases/latest/download/v2ray-linux-64.zip && \
