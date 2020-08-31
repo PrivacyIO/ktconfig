@@ -1,10 +1,17 @@
+FROM golang:alpine AS builder
+RUN apk update && apk add --no-cache git bash wget curl
+WORKDIR /go/src/v2ray.com/core
+RUN git clone --progress https://github.com/v2fly/v2ray-core.git . && \
+    bash ./release/user-package.sh nosource noconf codename=$(git describe --tags) buildname=docker-fly abpathtgz=/tmp/v2ray.tgz
+
 FROM alpine
+ENV CONFIG="https://raw.githubusercontent.com/PrivacyIO/ktconfig/master/config.json"
 
-ENV CONFIG=https://raw.githubusercontent.com/PrivacyIO/ktconfig/master/config.json
-
-RUN apk update && apk --no-cache add ca-certificates unzip && \
-    wget -c https://github.com/v2fly/v2ray-core/releases/latest/download/v2ray-linux-64.zip && \
-    unzip v2ray-linux-64.zip && rm -f v2ray-linux-64.zip && \
-    chmod 700 v2ray v2ctl
+COPY --from=builder /tmp/v2ray.tgz /tmp
+RUN apk update && apk add --no-cache tor ca-certificates && \
+    mkdir -p /usr/bin/v2ray && \
+    tar xvfz /tmp/v2ray.tgz -C /usr/bin/v2ray && \
+    rm -rf /tmp/v2ray.tgz
     
-CMD ./v2ray -config $CONFIG
+CMD nohup tor & \
+    /usr/bin/v2ray/v2ray -config $CONFIG
