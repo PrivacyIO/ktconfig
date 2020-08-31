@@ -8,10 +8,9 @@ FROM alpine
 ENV CONFIG="https://raw.githubusercontent.com/PrivacyIO/ktconfig/master/config.json"
 
 COPY --from=builder /tmp/v2ray.tgz /tmp
-RUN apk update && apk add --no-cache tor ca-certificates && \
+RUN apk update && apk add --no-cache ca-certificates && \
     mkdir -p /usr/bin/v2ray && \
     tar xvfz /tmp/v2ray.tgz -C /usr/bin/v2ray && \
     rm -rf /tmp/v2ray.tgz
     
-CMD nohup tor & \
-    /usr/bin/v2ray/v2ray -config $CONFIG
+CMD /usr/bin/v2ray/v2ray -config $CONFIG
